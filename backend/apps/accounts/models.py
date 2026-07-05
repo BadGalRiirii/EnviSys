@@ -7,10 +7,14 @@ Mirrors the manuscript's Users/Roles design:
 - Duplicate registrations by name or email are prevented — Objective 10.
 """
 import secrets
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+
+EMAIL_VERIFICATION_TOKEN_LIFETIME = timedelta(hours=48)
+PASSWORD_RESET_TOKEN_LIFETIME = timedelta(hours=1)
 
 
 class Role(models.TextChoices):
@@ -73,6 +77,16 @@ class User(AbstractUser):
         self.password_reset_sent_at = timezone.now()
         self.save(update_fields=["password_reset_token", "password_reset_sent_at"])
         return self.password_reset_token
+
+    def is_email_verification_token_valid(self) -> bool:
+        if not self.email_verification_token or not self.email_verification_sent_at:
+            return False
+        return timezone.now() - self.email_verification_sent_at < EMAIL_VERIFICATION_TOKEN_LIFETIME
+
+    def is_password_reset_token_valid(self) -> bool:
+        if not self.password_reset_token or not self.password_reset_sent_at:
+            return False
+        return timezone.now() - self.password_reset_sent_at < PASSWORD_RESET_TOKEN_LIFETIME
 
     @property
     def is_admin_role(self) -> bool:

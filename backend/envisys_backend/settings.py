@@ -136,6 +136,18 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/hour",
+        "user": "1000/hour",
+        "login": "10/minute",
+        "register": "5/hour",
+        "password_reset": "5/hour",
+        "token_confirm": "20/hour",
+    },
 }
 
 SIMPLE_JWT = {
@@ -183,6 +195,17 @@ BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "envisys@localhost")
 
 # ---------------------------------------------------------------------------
+# Field-level encryption for stored OAuth tokens (Fernet, via `cryptography`).
+# The dev default below is fine for localhost; production MUST set its own
+# via the FIELD_ENCRYPTION_KEY env var (generate with
+# `Fernet.generate_key()`) — anyone with the dev default could decrypt
+# tokens encrypted with it.
+# ---------------------------------------------------------------------------
+FIELD_ENCRYPTION_KEY = os.getenv(
+    "FIELD_ENCRYPTION_KEY", "Mc-qN97KvXxZ520USnQazbgkCXefCO_ADaV7RDiAMQg="
+)
+
+# ---------------------------------------------------------------------------
 # Google Workspace integration (OAuth / Drive / Docs)
 # ---------------------------------------------------------------------------
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
@@ -200,3 +223,13 @@ GOOGLE_OAUTH_SCOPES = [
 
 # Render deploys behind a proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# ---------------------------------------------------------------------------
+# Production transport security — skipped under DEBUG so localhost (plain
+# http://) keeps working for local development.
+# ---------------------------------------------------------------------------
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600

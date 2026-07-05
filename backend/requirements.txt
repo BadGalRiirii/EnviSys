@@ -10,6 +10,7 @@ requests==2.32.3
 channels==4.1.0
 daphne==4.1.2
 reportlab==4.2.2
+cryptography>=42.0        # encrypts stored Google OAuth tokens at rest
 
 # --- Optional: only needed for deployment / other databases ---
 psycopg[binary]>=3.2,<4.0   # PostgreSQL (Render) — flexible range so pip can pick a version with wheels for whatever Python Render runs

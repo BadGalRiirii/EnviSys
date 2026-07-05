@@ -8,6 +8,7 @@ from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -29,11 +30,15 @@ from .serializers import (
 
 class LoginView(TokenObtainPairView):
     serializer_class = EnviSysTokenObtainPairSerializer
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
 
 
 class StudentRegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = StudentRegistrationSerializer
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "register"
 
     def perform_create(self, serializer):
         user = serializer.save()
@@ -54,6 +59,8 @@ class StudentRegisterView(generics.CreateAPIView):
 
 class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "token_confirm"
 
     def post(self, request):
         token = request.data.get("token", "")
@@ -63,6 +70,11 @@ class VerifyEmailView(APIView):
             user = User.objects.get(email_verification_token=token)
         except User.DoesNotExist:
             return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_email_verification_token_valid():
+            return Response(
+                {"detail": "This link has expired. Please request a new verification email."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user.is_email_verified = True
         user.email_verification_token = ""
         user.save(update_fields=["is_email_verified", "email_verification_token"])
@@ -72,6 +84,8 @@ class VerifyEmailView(APIView):
 
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "password_reset"
 
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -92,6 +106,8 @@ class PasswordResetRequestView(APIView):
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "token_confirm"
 
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
@@ -100,6 +116,11 @@ class PasswordResetConfirmView(APIView):
             user = User.objects.get(password_reset_token=serializer.validated_data["token"])
         except User.DoesNotExist:
             return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_password_reset_token_valid():
+            return Response(
+                {"detail": "This link has expired. Please request a new password reset."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user.set_password(serializer.validated_data["password"])
         user.password_reset_token = ""
         user.save(update_fields=["password", "password_reset_token"])
