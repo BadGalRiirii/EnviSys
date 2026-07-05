@@ -1,0 +1,25 @@
+Django==5.0.6
+djangorestframework==3.15.1
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+django-filter==24.2
+dj-database-url==2.1.0
+python-dotenv==1.0.1
+whitenoise==6.6.0
+requests==2.32.3
+channels==4.1.0
+daphne==4.1.2
+reportlab==4.2.2
+
+# --- Optional: only needed for deployment / other databases ---
+# gunicorn==22.0.0            # production WSGI server (Render)
+# psycopg2-binary==2.9.9      # PostgreSQL (Render)
+# mysqlclient==2.2.4          # MySQL (local, per manuscript)
+
+# --- Optional: Google Drive/Docs integration (leave out to run without it) ---
+google-auth==2.29.0
+google-auth-oauthlib==1.2.0
+google-api-python-client==2.129.0
+
+# --- Optional: Brevo email delivery (console fallback is used without it) ---
+# sib-api-v3-sdk==7.6.0
