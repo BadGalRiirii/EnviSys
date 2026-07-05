@@ -12,7 +12,7 @@ daphne==4.1.2
 reportlab==4.2.2
 
 # --- Optional: only needed for deployment / other databases ---
-psycopg[binary]==3.2.3      # PostgreSQL (Render) — psycopg2-binary lacks wheels for newer Python
+psycopg[binary]>=3.2,<4.0   # PostgreSQL (Render) — flexible range so pip can pick a version with wheels for whatever Python Render runs
 # mysqlclient==2.2.4      # MySQL (local, per manuscript)
 
 # --- Optional: Google Drive/Docs integration (leave out to run without it) ---
