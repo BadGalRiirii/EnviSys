@@ -21,3 +21,6 @@ frontend/tsconfig.tsbuildinfo
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Local-only credentials reference (never commit this)
+CREDENTIALS.md
